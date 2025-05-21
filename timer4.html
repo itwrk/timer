@@ -191,20 +191,149 @@
 
   <script>
     // --- Configuration ---
+    // Data from Book1.csv
     const tasks = [
-      { タスク名: "ラットプルダウン", 順番: 1, 秒数: 5, 読み上げ: "1回目。よし、集中！" },
-      { タスク名: "ラットプルダウン", 順番: 2, 秒数: 5, 読み上げ: "2回目。いい調子！" },
-      { タスク名: "ラットプルダウン", 順番: 3, 秒数: 5, 読み上げ: "3回目。素晴らしい！" },
-      { タスク名: "ラットプルダウン", 順番: 4, 秒数: 10, 読み上げ: "胸を張って、しっかり引く。" },
-      { タスク名: "ラットプルダウン", 順番: 5, 秒数: 5, 読み上げ: "ラスト1回！頑張って！" },
-      { タスク名: "スクワット", 順番: 1, 秒数: 5, 読み上げ: "1回目。深く、丁寧に。" },
-      { タスク名: "スクワット", 順番: 2, 秒数: 5, 読み上げ: "2回目。膝を前に出さないように。" },
-      { タスク名: "スクワット", 順番: 3, 秒数: 5, 読み上げ: "3回目。お尻を意識して。" },
-      { タスク名: "スクワット", 順番: 4, 秒数: 10, 読み上げ: "フォームを崩さず、あと半分！" },
-      { タスク名: "スクワット", 順番: 5, 秒数: 5, 読み上げ: "最後の1回！よくできました！" },
-      { タスク名: "プランク", 順番: 1, 秒数: 30, 読み上げ: "体幹を意識して30秒キープ！" },
-      { タスク名: "プランク", 順番: 2, 秒数: 10, 読み上げ: "休憩10秒。呼吸を整えて。" },
-      { タスク名: "プランク", 順番: 3, 秒数: 30, 読み上げ: "もう一度30秒！頑張って！" },
+      { タスク名: "ラットプルダウン", 順番: 1, 秒数: 7, 読み上げ: "1回目。いいぞ、その調子！", 項目名: "1set-1rep" },
+      { タスク名: "ラットプルダウン", 順番: 2, 秒数: 7, 読み上げ: "2回目。ナイスフォーム！", 項目名: "1set-2rep" },
+      { タスク名: "ラットプルダウン", 順番: 3, 秒数: 7, 読み上げ: "3回目。あと少し、頑張れ！", 項目名: "1set-3rep" },
+      { タスク名: "ラットプルダウン", 順番: 4, 秒数: 7, 読み上げ: "4回目。素晴らしい集中力！", 項目名: "1set-4rep" },
+      { タスク名: "ラットプルダウン", 順番: 5, 秒数: 7, 読み上げ: "5回目。よくできてる！", 項目名: "1set-5rep" },
+      { タスク名: "ラットプルダウン", 順番: 6, 秒数: 7, 読み上げ: "6回目。そのままキープ！", 項目名: "1set-6rep" },
+      { タスク名: "ラットプルダウン", 順番: 7, 秒数: 7, 読み上げ: "7回目。あと半分！", 項目名: "1set-7rep" },
+      { タスク名: "ラットプルダウン", 順番: 8, 秒数: 7, 読み上げ: "8回目。しっかり動かそう！", 項目名: "1set-8rep" },
+      { タスク名: "ラットプルダウン", 順番: 9, 秒数: 7, 読み上げ: "9回目。きれいな動き！", 項目名: "1set-9rep" },
+      { タスク名: "ラットプルダウン", 順番: 10, 秒数: 7, 読み上げ: "10回目。リズムよくいこう！", 項目名: "1set-10rep" },
+      { タスク名: "ラットプルダウン", 順番: 11, 秒数: 7, 読み上げ: "11回目。そのまま、続けて！", 項目名: "1set-11rep" },
+      { タスク名: "ラットプルダウン", 順番: 12, 秒数: 7, 読み上げ: "12回目。力強い動きだ！", 項目名: "1set-12rep" },
+      { タスク名: "ラットプルダウン", 順番: 13, 秒数: 7, 読み上げ: "13回目。もう少しで終わり！", 項目名: "1set-13rep" },
+      { タスク名: "ラットプルダウン", 順番: 14, 秒数: 7, 読み上げ: "14回目。全集中！", 項目名: "1set-14rep" },
+      { タスク名: "ラットプルダウン", 順番: 15, 秒数: 7, 読み上げ: "15回目。ラスト1回！", 項目名: "1set-15rep" },
+      { タスク名: "ラットプルダウン", 順番: 1, 秒数: 100, 読み上げ: "胸を張って、肩甲骨を寄せるイメージで。腕じゃなく背中で引いて。", 項目名: "ラットプルダウンの1回目の休憩" },
+      { タスク名: "ラットプルダウン", 順番: 1, 秒数: 7, 読み上げ: "1回目。いいぞ、その調子！", 項目名: "2set-1rep" },
+      { タスク名: "ラットプルダウン", 順番: 2, 秒数: 7, 読み上げ: "2回目。ナイスフォーム！", 項目名: "2set-2rep" },
+      { タスク名: "ラットプルダウン", 順番: 3, 秒数: 7, 読み上げ: "3回目。あと少し、頑張れ！", 項目名: "2set-3rep" },
+      { タスク名: "ラットプルダウン", 順番: 4, 秒数: 7, 読み上げ: "4回目。素晴らしい集中力！", 項目名: "2set-4rep" },
+      { タスク名: "ラットプルダウン", 順番: 5, 秒数: 7, 読み上げ: "5回目。よくできてる！", 項目名: "2set-5rep" },
+      { タスク名: "ラットプルダウン", 順番: 6, 秒数: 7, 読み上げ: "6回目。そのままキープ！", 項目名: "2set-6rep" },
+      { タスク名: "ラットプルダウン", 順番: 7, 秒数: 7, 読み上げ: "7回目。あと半分！", 項目名: "2set-7rep" },
+      { タスク名: "ラットプルダウン", 順番: 8, 秒数: 7, 読み上げ: "8回目。しっかり動かそう！", 項目名: "2set-8rep" },
+      { タスク名: "ラットプルダウン", 順番: 9, 秒数: 7, 読み上げ: "9回目。きれいな動き！", 項目名: "2set-9rep" },
+      { タスク名: "ラットプルダウン", 順番: 10, 秒数: 7, 読み上げ: "10回目。リズムよくいこう！", 項目名: "2set-10rep" },
+      { タスク名: "ラットプルダウン", 順番: 11, 秒数: 7, 読み上げ: "11回目。そのまま、続けて！", 項目名: "2set-11rep" },
+      { タスク名: "ラットプルダウン", 順番: 12, 秒数: 7, 読み上げ: "12回目。力強い動きだ！", 項目名: "2set-12rep" },
+      { タスク名: "ラットプルダウン", 順番: 13, 秒数: 7, 読み上げ: "13回目。もう少しで終わり！", 項目名: "2set-13rep" },
+      { タスク名: "ラットプルダウン", 順番: 14, 秒数: 7, 読み上げ: "14回目。全集中！", 項目名: "2set-14rep" },
+      { タスク名: "ラットプルダウン", 順番: 15, 秒数: 7, 読み上げ: "15回目。ラスト1回！", 項目名: "2set-15rep" },
+      { タスク名: "ラットプルダウン", 順番: 1, 秒数: 100, 読み上げ: "胸を張って、肩甲骨を寄せるイメージで。腕じゃなく背中で引いて。", 項目名: "ラットプルダウンの2回目の休憩" },
+      { タスク名: "ラットプルダウン", 順番: 1, 秒数: 7, 読み上げ: "1回目。いいぞ、その調子！", 項目名: "3set-1rep" },
+      { タスク名: "ラットプルダウン", 順番: 2, 秒数: 7, 読み上げ: "2回目。ナイスフォーム！", 項目名: "3set-2rep" },
+      { タスク名: "ラットプルダウン", 順番: 3, 秒数: 7, 読み上げ: "3回目。あと少し、頑張れ！", 項目名: "3set-3rep" },
+      { タスク名: "ラットプルダウン", 順番: 4, 秒数: 7, 読み上げ: "4回目。素晴らしい集中力！", 項目名: "3set-4rep" },
+      { タスク名: "ラットプルダウン", 順番: 5, 秒数: 7, 読み上げ: "5回目。よくできてる！", 項目名: "3set-5rep" },
+      { タスク名: "ラットプルダウン", 順番: 6, 秒数: 7, 読み上げ: "6回目。そのままキープ！", 項目名: "3set-6rep" },
+      { タスク名: "ラットプルダウン", 順番: 7, 秒数: 7, 読み上げ: "7回目。あと半分！", 項目名: "3set-7rep" },
+      { タスク名: "ラットプルダウン", 順番: 8, 秒数: 7, 読み上げ: "8回目。しっかり動かそう！", 項目名: "3set-8rep" },
+      { タスク名: "ラットプルダウン", 順番: 9, 秒数: 7, 読み上げ: "9回目。きれいな動き！", 項目名: "3set-9rep" },
+      { タスク名: "ラットプルダウン", 順番: 10, 秒数: 7, 読み上げ: "10回目。リズムよくいこう！", 項目名: "3set-10rep" },
+      { タスク名: "ラットプルダウン", 順番: 11, 秒数: 7, 読み上げ: "11回目。そのまま、続けて！", 項目名: "3set-11rep" },
+      { タスク名: "ラットプルダウン", 順番: 12, 秒数: 7, 読み上げ: "12回目。力強い動きだ！", 項目名: "3set-12rep" },
+      { タスク名: "ラットプルダウン", 順番: 13, 秒数: 7, 読み上げ: "13回目。もう少しで終わり！", 項目名: "3set-13rep" },
+      { タスク名: "ラットプルダウン", 順番: 14, 秒数: 7, 読み上げ: "14回目。全集中！", 項目名: "3set-14rep" },
+      { タスク名: "ラットプルダウン", 順番: 15, 秒数: 7, 読み上げ: "15回目。ラスト1回！", 項目名: "3set-15rep" },
+      { タスク名: "スクワット", 順番: 1, 秒数: 7, 読み上げ: "1回目。いいぞ、その調子！", 項目名: "1set-1rep" },
+      { タスク名: "スクワット", 順番: 2, 秒数: 7, 読み上げ: "2回目。ナイスフォーム！", 項目名: "1set-2rep" },
+      { タスク名: "スクワット", 順番: 3, 秒数: 7, 読み上げ: "3回目。あと少し、頑張れ！", 項目名: "1set-3rep" },
+      { タスク名: "スクワット", 順番: 4, 秒数: 7, 読み上げ: "4回目。素晴らしい集中力！", 項目名: "1set-4rep" },
+      { タスク名: "スクワット", 順番: 5, 秒数: 7, 読み上げ: "5回目。よくできてる！", 項目名: "1set-5rep" },
+      { タスク名: "スクワット", 順番: 6, 秒数: 7, 読み上げ: "6回目。そのままキープ！", 項目名: "1set-6rep" },
+      { タスク名: "スクワット", 順番: 7, 秒数: 7, 読み上げ: "7回目。あと半分！", 項目名: "1set-7rep" },
+      { タスク名: "スクワット", 順番: 8, 秒数: 7, 読み上げ: "8回目。しっかり動かそう！", 項目名: "1set-8rep" },
+      { タスク名: "スクワット", 順番: 9, 秒数: 7, 読み上げ: "9回目。きれいな動き！", 項目名: "1set-9rep" },
+      { タスク名: "スクワット", 順番: 10, 秒数: 7, 読み上げ: "10回目。リズムよくいこう！", 項目名: "1set-10rep" },
+      { タスク名: "スクワット", 順番: 11, 秒数: 7, 読み上げ: "11回目。そのまま、続けて！", 項目名: "1set-11rep" },
+      { タスク名: "スクワット", 順番: 12, 秒数: 7, 読み上げ: "12回目。力強い動きだ！", 項目名: "1set-12rep" },
+      { タスク名: "スクワット", 順番: 13, 秒数: 7, 読み上げ: "13回目。もう少しで終わり！", 項目名: "1set-13rep" },
+      { タスク名: "スクワット", 順番: 14, 秒数: 7, 読み上げ: "14回目。全集中！", 項目名: "1set-14rep" },
+      { タスク名: "スクワット", 順番: 15, 秒数: 7, 読み上げ: "15回目。ラスト1回！", 項目名: "1set-15rep" },
+      { タスク名: "スクワット", 順番: 1, 秒数: 100, 読み上げ: "胸を張って、膝はつま先より前に出さずに。かかとで踏み込んで。", 項目名: "スクワットの1回目の休憩" },
+      { タスク名: "スクワット", 順番: 1, 秒数: 7, 読み上げ: "1回目。いいぞ、その調子！", 項目名: "2set-1rep" },
+      { タスク名: "スクワット", 順番: 2, 秒数: 7, 読み上げ: "2回目。ナイスフォーム！", 項目名: "2set-2rep" },
+      { タスク名: "スクワット", 順番: 3, 秒数: 7, 読み上げ: "3回目。あと少し、頑張れ！", 項目名: "2set-3rep" },
+      { タスク名: "スクワット", 順番: 4, 秒数: 7, 読み上げ: "4回目。素晴らしい集中力！", 項目名: "2set-4rep" },
+      { タスク名: "スクワット", 順番: 5, 秒数: 7, 読み上げ: "5回目。よくできてる！", 項目名: "2set-5rep" },
+      { タスク名: "スクワット", 順番: 6, 秒数: 7, 読み上げ: "6回目。そのままキープ！", 項目名: "2set-6rep" },
+      { タスク名: "スクワット", 順番: 7, 秒数: 7, 読み上げ: "7回目。あと半分！", 項目名: "2set-7rep" },
+      { タスク名: "スクワット", 順番: 8, 秒数: 7, 読み上げ: "8回目。しっかり動かそう！", 項目名: "2set-8rep" },
+      { タスク名: "スクワット", 順番: 9, 秒数: 7, 読み上げ: "9回目。きれいな動き！", 項目名: "2set-9rep" },
+      { タスク名: "スクワット", 順番: 10, 秒数: 7, 読み上げ: "10回目。リズムよくいこう！", 項目名: "2set-10rep" },
+      { タスク名: "スクワット", 順番: 11, 秒数: 7, 読み上げ: "11回目。そのまま、続けて！", 項目名: "2set-11rep" },
+      { タスク名: "スクワット", 順番: 12, 秒数: 7, 読み上げ: "12回目。力強い動きだ！", 項目名: "2set-12rep" },
+      { タスク名: "スクワット", 順番: 13, 秒数: 7, 読み上げ: "13回目。もう少しで終わり！", 項目名: "2set-13rep" },
+      { タスク名: "スクワット", 順番: 14, 秒数: 7, 読み上げ: "14回目。全集中！", 項目名: "2set-14rep" },
+      { タスク名: "スクワット", 順番: 15, 秒数: 7, 読み上げ: "15回目。ラスト1回！", 項目名: "2set-15rep" },
+      { タスク名: "スクワット", 順番: 1, 秒数: 100, 読み上げ: "胸を張って、膝はつま先より前に出さずに。かかとで踏み込んで。", 項目名: "スクワットの2回目の休憩" },
+      { タスク名: "スクワット", 順番: 1, 秒数: 7, 読み上げ: "1回目。いいぞ、その調子！", 項目名: "3set-1rep" },
+      { タスク名: "スクワット", 順番: 2, 秒数: 7, 読み上げ: "2回目。ナイスフォーム！", 項目名: "3set-2rep" },
+      { タスク名: "スクワット", 順番: 3, 秒数: 7, 読み上げ: "3回目。あと少し、頑張れ！", 項目名: "3set-3rep" },
+      { タスク名: "スクワット", 順番: 4, 秒数: 7, 読み上げ: "4回目。素晴らしい集中力！", 項目名: "3set-4rep" },
+      { タスク名: "スクワット", 順番: 5, 秒数: 7, 読み上げ: "5回目。よくできてる！", 項目名: "3set-5rep" },
+      { タスク名: "スクワット", 順番: 6, 秒数: 7, 読み上げ: "6回目。そのままキープ！", 項目名: "3set-6rep" },
+      { タスク名: "スクワット", 順番: 7, 秒数: 7, 読み上げ: "7回目。あと半分！", 項目名: "3set-7rep" },
+      { タスク名: "スクワット", 順番: 8, 秒数: 7, 読み上げ: "8回目。しっかり動かそう！", 項目名: "3set-8rep" },
+      { タスク名: "スクワット", 順番: 9, 秒数: 7, 読み上げ: "9回目。きれいな動き！", 項目名: "3set-9rep" },
+      { タスク名: "スクワット", 順番: 10, 秒数: 7, 読み上げ: "10回目。リズムよくいこう！", 項目名: "3set-10rep" },
+      { タスク名: "スクワット", 順番: 11, 秒数: 7, 読み上げ: "11回目。そのまま、続けて！", 項目名: "3set-11rep" },
+      { タスク名: "スクワット", 順番: 12, 秒数: 7, 読み上げ: "12回目。力強い動きだ！", 項目名: "3set-12rep" },
+      { タスク名: "スクワット", 順番: 13, 秒数: 7, 読み上げ: "13回目。もう少しで終わり！", 項目名: "3set-13rep" },
+      { タスク名: "スクワット", 順番: 14, 秒数: 7, 読み上げ: "14回目。全集中！", 項目名: "3set-14rep" },
+      { タスク名: "スクワット", 順番: 15, 秒数: 7, 読み上げ: "15回目。ラスト1回！", 項目名: "3set-15rep" },
+      { タスク名: "シーテッドロー", 順番: 1, 秒数: 7, 読み上げ: "1回目。いいぞ、その調子！", 項目名: "1set-1rep" },
+      { タスク名: "シーテッドロー", 順番: 2, 秒数: 7, 読み上げ: "2回目。ナイスフォーム！", 項目名: "1set-2rep" },
+      { タスク名: "シーテッドロー", 順番: 3, 秒数: 7, 読み上げ: "3回目。あと少し、頑張れ！", 項目名: "1set-3rep" },
+      { タスク名: "シーテッドロー", 順番: 4, 秒数: 7, 読み上げ: "4回目。素晴らしい集中力！", 項目名: "1set-4rep" },
+      { タスク名: "シーテッドロー", 順番: 5, 秒数: 7, 読み上げ: "5回目。よくできてる！", 項目名: "1set-5rep" },
+      { タスク名: "シーテッドロー", 順番: 6, 秒数: 7, 読み上げ: "6回目。そのままキープ！", 項目名: "1set-6rep" },
+      { タスク名: "シーテッドロー", 順番: 7, 秒数: 7, 読み上げ: "7回目。あと半分！", 項目名: "1set-7rep" },
+      { タスク名: "シーテッドロー", 順番: 8, 秒数: 7, 読み上げ: "8回目。しっかり動かそう！", 項目名: "1set-8rep" },
+      { タスク名: "シーテッドロー", 順番: 9, 秒数: 7, 読み上げ: "9回目。きれいな動き！", 項目名: "1set-9rep" },
+      { タスク名: "シーテッドロー", 順番: 10, 秒数: 7, 読み上げ: "10回目。リズムよくいこう！", 項目名: "1set-10rep" },
+      { タスク名: "シーテッドロー", 順番: 11, 秒数: 7, 読み上げ: "11回目。そのまま、続けて！", 項目名: "1set-11rep" },
+      { タスク名: "シーテッドロー", 順番: 12, 秒数: 7, 読み上げ: "12回目。力強い動きだ！", 項目名: "1set-12rep" },
+      { タスク名: "シーテッドロー", 順番: 13, 秒数: 7, 読み上げ: "13回目。もう少しで終わり！", 項目名: "1set-13rep" },
+      { タスク名: "シーテッドロー", 順番: 14, 秒数: 7, 読み上げ: "14回目。全集中！", 項目名: "1set-14rep" },
+      { タスク名: "シーテッドロー", 順番: 15, 秒数: 7, 読み上げ: "15回目。ラスト1回！", 項目名: "1set-15rep" },
+      { タスク名: "シーテッドロー", 順番: 1, 秒数: 100, 読み上げ: "背筋を伸ばして、肘をしっかり後ろへ引いて。反動は使わないように。", 項目名: "シーテッドローの1回目の休憩" },
+      { タスク名: "シーテッドロー", 順番: 1, 秒数: 7, 読み上げ: "1回目。いいぞ、その調子！", 項目名: "2set-1rep" },
+      { タスク名: "シーテッドロー", 順番: 2, 秒数: 7, 読み上げ: "2回目。ナイスフォーム！", 項目名: "2set-2rep" },
+      { タスク名: "シーテッドロー", 順番: 3, 秒数: 7, 読み上げ: "3回目。あと少し、頑張れ！", 項目名: "2set-3rep" },
+      { タスク名: "シーテッドロー", 順番: 4, 秒数: 7, 読み上げ: "4回目。素晴らしい集中力！", 項目名: "2set-4rep" },
+      { タスク名: "シーテッドロー", 順番: 5, 秒数: 7, 読み上げ: "5回目。よくできてる！", 項目名: "2set-5rep" },
+      { タスク名: "シーテッドロー", 順番: 6, 秒数: 7, 読み上げ: "6回目。そのままキープ！", 項目名: "2set-6rep" },
+      { タスク名: "シーテッドロー", 順番: 7, 秒数: 7, 読み上げ: "7回目。あと半分！", 項目名: "2set-7rep" },
+      { タスク名: "シーテッドロー", 順番: 8, 秒数: 7, 読み上げ: "8回目。しっかり動かそう！", 項目名: "2set-8rep" },
+      { タスク名: "シーテッドロー", 順番: 9, 秒数: 7, 読み上げ: "9回目。きれいな動き！", 項目名: "2set-9rep" },
+      { タスク名: "シーテッドロー", 順番: 10, 秒数: 7, 読み上げ: "10回目。リズムよくいこう！", 項目名: "2set-10rep" },
+      { タスク名: "シーテッドロー", 順番: 11, 秒数: 7, 読み上げ: "11回目。そのまま、続けて！", 項目名: "2set-11rep" },
+      { タスク名: "シーテッドロー", 順番: 12, 秒数: 7, 読み上げ: "12回目。力強い動きだ！", 項目名: "2set-12rep" },
+      { タスク名: "シーテッドロー", 順番: 13, 秒数: 7, 読み上げ: "13回目。もう少しで終わり！", 項目名: "2set-13rep" },
+      { タスク名: "シーテッドロー", 順番: 14, 秒数: 7, 読み上げ: "14回目。全集中！", 項目名: "2set-14rep" },
+      { タスク名: "シーテッドロー", 順番: 15, 秒数: 7, 読み上げ: "15回目。ラスト1回！", 項目名: "2set-15rep" },
+      { タスク名: "シーテッドロー", 順番: 1, 秒数: 100, 読み上げ: "背筋を伸ばして、肘をしっかり後ろへ引いて。反動は使わないように。", 項目名: "シーテッドローの2回目の休憩" },
+      { タスク名: "シーテッドロー", 順番: 1, 秒数: 7, 読み上げ: "1回目。いいぞ、その調子！", 項目名: "3set-1rep" },
+      { タスク名: "シーテッドロー", 順番: 2, 秒数: 7, 読み上げ: "2回目。ナイスフォーム！", 項目名: "3set-2rep" },
+      { タスク名: "シーテッドロー", 順番: 3, 秒数: 7, 読み上げ: "3回目。あと少し、頑張れ！", 項目名: "3set-3rep" },
+      { タスク名: "シーテッドロー", 順番: 4, 秒数: 7, 読み上げ: "4回目。素晴らしい集中力！", 項目名: "3set-4rep" },
+      { タスク名: "シーテッドロー", 順番: 5, 秒数: 7, 読み上げ: "5回目。よくできてる！", 項目名: "3set-5rep" },
+      { タスク名: "シーテッドロー", 順番: 6, 秒数: 7, 読み上げ: "6回目。そのままキープ！", 項目名: "3set-6rep" },
+      { タスク名: "シーテッドロー", 順番: 7, 秒数: 7, 読み上げ: "7回目。あと半分！", 項目名: "3set-7rep" },
+      { タスク名: "シーテッドロー", 順番: 8, 秒数: 7, 読み上げ: "8回目。しっかり動かそう！", 項目名: "3set-8rep" },
+      { タスク名: "シーテッドロー", 順番: 9, 秒数: 7, 読み上げ: "9回目。きれいな動き！", 項目名: "3set-9rep" },
+      { タスク名: "シーテッドロー", 順番: 10, 秒数: 7, 読み上げ: "10回目。リズムよくいこう！", 項目名: "3set-10rep" },
+      { タスク名: "シーテッドロー", 順番: 11, 秒数: 7, 読み上げ: "11回目。そのまま、続けて！", 項目名: "3set-11rep" },
+      { タスク名: "シーテッドロー", 順番: 12, 秒数: 7, 読み上げ: "12回目。力強い動きだ！", 項目名: "3set-12rep" },
+      { タスク名: "シーテッドロー", 順番: 13, 秒数: 7, 読み上げ: "13回目。もう少しで終わり！", 項目名: "3set-13rep" },
+      { タスク名: "シーテッドロー", 順番: 14, 秒数: 7, 読み上げ: "14回目。全集中！", 項目名: "3set-14rep" },
+      { タスク名: "シーテッドロー", 順番: 15, 秒数: 7, 読み上げ: "15回目。ラスト1回！", 項目名: "3set-15rep" }
     ];
 
     // --- Global State ---
@@ -212,7 +341,7 @@
     let currentTaskIndex = 0;
     let countdownIntervalId = null;
     let nextTaskTimeoutId = null;
-    let currentWorkoutName = "";
+    let currentWorkoutName = ""; // This will store the main exercise name like "ラットプルダウン"
     let timerState = "IDLE"; // IDLE, RUNNING, PAUSED
     let remainingSeconds = 0;
     let speechSynthesisVoices = [];
@@ -232,7 +361,6 @@
 
 
     // --- Speech Synthesis ---
-    // Function to initialize speech synthesis voices
     function initializeVoices() {
       speechSynthesisVoices = speechSynthesis.getVoices();
       if (speechSynthesisVoices.length === 0 && speechSynthesis.onvoiceschanged !== undefined) {
@@ -242,7 +370,6 @@
       }
     }
 
-    // Function to speak text with a callback on end
     function speak(text, onEndCallback = null) {
       speechSynthesis.cancel(); 
       const utter = new SpeechSynthesisUtterance(text);
@@ -295,7 +422,7 @@
       }
 
       workoutTaskListContainer.classList.remove("hidden");
-      taskListTitle.textContent = `${currentWorkoutName} のタスク:`;
+      taskListTitle.textContent = `${currentWorkoutName} のタスク:`; 
       workoutTaskListUL.innerHTML = ''; 
 
       currentWorkoutTasks.forEach((task, index) => {
@@ -312,12 +439,19 @@
         listItem.innerHTML = ''; 
 
         const taskOrderStrong = document.createElement('strong');
-        taskOrderStrong.textContent = `${task.順番}:`; 
+        let orderText = "";
+        // Use 項目名 to determine if it's a rest step for display
+        if (task.項目名 && task.項目名.includes("休憩")) { 
+            orderText = "休憩:";
+        } else {
+            orderText = `${task.順番}回目:`;
+        }
+        taskOrderStrong.textContent = orderText;
         listItem.appendChild(taskOrderStrong);
 
         const taskDescriptionSpan = document.createElement('span');
         taskDescriptionSpan.classList.add('task-description');
-        taskDescriptionSpan.textContent = task.読み上げ;
+        taskDescriptionSpan.textContent = task.読み上げ; 
         listItem.appendChild(taskDescriptionSpan);
         
         const durationControlDiv = document.createElement('div');
@@ -355,9 +489,10 @@
 
     // --- Timer Logic ---
     function setupWorkoutButtons() {
-      const uniqueTaskNames = [...new Set(tasks.map(t => t.タスク名))];
+      const mainExerciseNames = [...new Set(tasks.map(t => t.タスク名))].filter(name => name !== "休憩");
+
       taskButtonsContainer.innerHTML = ''; 
-      uniqueTaskNames.forEach(name => {
+      mainExerciseNames.forEach(name => {
         const btn = document.createElement("button");
         btn.textContent = name;
         btn.onclick = () => startWorkout(name);
@@ -365,19 +500,29 @@
       });
     }
 
-    function startWorkout(workoutName) {
+    function startWorkout(selectedExerciseName) { 
       if (timerState !== "IDLE") { 
         stopWorkout(false);
       }
-      currentWorkoutName = workoutName;
-      currentWorkoutTasks = tasks.filter(t => t.タスク名 === workoutName).sort((a, b) => a.順番 - b.順番);
+      currentWorkoutName = selectedExerciseName; 
+
+      currentWorkoutTasks = tasks.filter(t => {
+        // Include if タスク名 matches the selected exercise OR 
+        // if 項目名 indicates it's a rest related to the selected exercise.
+        // (The CSV structure now uses the main exercise name in タスク名 for rests too)
+        return t.タスク名 === selectedExerciseName;
+      });
+      
+      // The CSV should already be in the correct order for a given exercise.
+      // If sorting by '項目名' is needed to ensure set/rep/rest order, it could be complex.
+      // For now, assume the global `tasks` array is correctly ordered per exercise.
+      // Example: All "ラットプルダウン" reps and its rests are together and in order.
+
       currentTaskIndex = 0;
       timerState = "RUNNING";
 
       updateControlButtons();
-      // For currentWorkoutNameDisplay, show the workout name.
-      // For taskNameDisplay, show "開始します" initially.
-      updateTaskInfo(currentWorkoutName, "開始します", ""); // Modified
+      updateTaskInfo(currentWorkoutName, "開始します", ""); 
       displayWorkoutProgressList(); 
 
       speak(`${currentWorkoutName}を開始します。`, () => {
@@ -399,12 +544,18 @@
       }
 
       const task = currentWorkoutTasks[currentTaskIndex];
-      // For currentWorkoutNameDisplay, show the workout name.
-      // For taskNameDisplay, show only the step number.
+      let displayStepText = "";
+      // Use 項目名 to determine if it's a rest step for display
+      if (task.項目名 && task.項目名.includes("休憩")) {
+          displayStepText = "休憩";
+      } else {
+          displayStepText = `${task.順番}回目`;
+      }
+      
       updateTaskInfo(
-        currentWorkoutName, // Workout name for the top display
-        `${task.順番}回目`,   // Step number for the second display
-        task.読み上げ        // Speak text for the third display
+        currentWorkoutName, 
+        displayStepText, 
+        task.読み上げ        
       );
       remainingSeconds = task.秒数; 
       updateTimerDisplay(remainingSeconds);
@@ -476,19 +627,16 @@
       const workoutNameToAnnounce = currentWorkoutName; 
 
       timerState = "IDLE"; 
-      currentWorkoutName = "";
+      currentWorkoutName = ""; 
+      currentWorkoutTasks = []; 
+      currentTaskIndex = 0;
       remainingSeconds = 0;
 
-      // Reset displays to initial state
       updateTaskInfo("ワークアウトを選択してください", "ステップ名", "読み上げ内容"); 
       updateControlButtons(); 
+      workoutTaskListContainer.classList.add("hidden"); 
+      workoutTaskListUL.innerHTML = ''; 
 
-      if (!wasActive || announce) { 
-          workoutTaskListContainer.classList.add("hidden");
-          workoutTaskListUL.innerHTML = '';
-      } else if (wasActive && currentTaskIndex >= currentWorkoutTasks.length) {
-          displayWorkoutProgressList();
-      }
 
       if (announce && wasActive && workoutNameToAnnounce) { 
         speak(`${workoutNameToAnnounce}を停止しました。`);
@@ -504,7 +652,6 @@
       initializeVoices(); 
       setupWorkoutButtons(); 
       updateControlButtons(); 
-      // Set initial display texts
       updateTaskInfo("ワークアウトを選択してください", "ステップ名", "読み上げ内容"); 
       updateTimerDisplay("--"); 
       workoutTaskListContainer.classList.add("hidden"); 
