@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>筋トレ音声タイマー</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: #f4f7f6;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start; /* Adjusted for scrollable content */
+      min-height: 100vh;
+      margin: 0;
+      padding: 1rem;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .container {
+      background: #fff;
+      padding: 1.5rem 2rem; /* Adjusted padding */
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px; /* Increased max-width for task list */
+      margin-bottom: 2rem; /* Space for potential overflow */
+    }
+    h1 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: #2c3e50;
+      font-size: 2rem;
+    }
+    .info {
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+      color: #555;
+      min-height: 1.5em; /* Prevent layout shifts */
+    }
+    .timer {
+      font-size: 4.5rem;
+      margin-bottom: 1.5rem;
+      color: #3498db;
+      font-weight: bold;
+    }
+    .button-group {
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .controls button,
+    .button-group button {
+      font-size: 1rem;
+      padding: 0.8rem 1.2rem;
+      margin: 0.3rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s ease, transform 0.1s ease;
+      background-color: #3498db;
+      color: white;
+    }
+    .controls button:hover,
+    .button-group button:hover {
+      background-color: #2980b9;
+    }
+    .controls button:active,
+    .button-group button:active {
+        transform: scale(0.98);
+    }
+    .controls {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem; /* Added margin for spacing */
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .controls button#stopButton {
+        background-color: #e74c3c;
+    }
+    .controls button#stopButton:hover {
+        background-color: #c0392b;
+    }
+    .hidden {
+      display: none !important;
+    }
+
+    /* Task List Styles */
+    .workout-task-list-container {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #ecf0f1;
+      border-radius: 8px;
+      max-height: 300px; /* Limit height and make scrollable */
+      overflow-y: auto;
+      text-align: left;
+    }
+    .workout-task-list-container h3 {
+      margin-top: 0;
+      margin-bottom: 0.8rem;
+      font-size: 1.2rem;
+      color: #2c3e50;
+      border-bottom: 1px solid #bdc3c7;
+      padding-bottom: 0.5rem;
+    }
+    .workout-task-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    .task-item {
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      display: flex; /* Allow items to align better */
+      align-items: center; /* Vertically align items in task item */
+      flex-wrap: wrap; /* Allow wrapping if content is too long */
+    }
+    .task-item strong {
+      color: #34495e;
+      margin-right: 5px; /* Space after order number */
+    }
+    .task-item .task-description {
+        flex-grow: 1; /* Allow description to take available space */
+        margin-right: 10px; /* Space before duration control */
+    }
+
+    .task-duration-control {
+        display: inline-flex;
+        align-items: center;
+        margin-left: auto; /* Push to the right if space allows, or use flex properties on parent */
+    }
+    .task-duration-input {
+      width: 55px; /* Adjust as needed */
+      padding: 3px 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      text-align: right;
+      font-size: 0.9rem;
+    }
+    .duration-unit-label {
+        margin-left: 4px;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .task-item.completed {
+      background-color: #e8f5e9; /* Light green */
+      border-left: 5px solid #4CAF50; /* Green accent */
+      opacity: 0.7;
+    }
+    .task-item.current {
+      background-color: #e3f2fd; /* Light blue */
+      border-left: 5px solid #2196F3; /* Blue accent */
+      font-weight: bold;
+    }
+    .task-item.pending {
+      background-color: #f5f5f5; /* Light grey */
+      border-left: 5px solid #9e9e9e; /* Grey accent */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>筋トレ音声タイマー</h1>
+    <div class="button-group" id="taskButtons">
+      </div>
+    <div class="info" id="currentWorkoutNameDisplay">ワークアウトを選択してください</div>
+    <div class="info" id="taskNameDisplay">ステップ名</div>
+    <div class="info" id="speakTextDisplay">読み上げ内容</div>
+    <div class="timer" id="timerDisplay">--</div>
+    <div class="controls hidden" id="timerControls">
+      <button id="pauseResumeButton">一時停止</button>
+      <button id="stopButton">停止</button>
+    </div>
+    <div class="workout-task-list-container hidden" id="workoutTaskListContainer">
+      <h3 id="taskListTitle"></h3>
+      <ul class="workout-task-list" id="workoutTaskList">
+        </ul>
+    </div>
+  </div>
+
+  <script>
+    // --- Configuration ---
+    const tasks = [
+      { タスク名: "ラットプルダウン", 順番: 1, 秒数: 5, 読み上げ: "1回目。よし、集中！" },
+      { タスク名: "ラットプルダウン", 順番: 2, 秒数: 5, 読み上げ: "2回目。いい調子！" },
+      { タスク名: "ラットプルダウン", 順番: 3, 秒数: 5, 読み上げ: "3回目。素晴らしい！" },
+      { タスク名: "ラットプルダウン", 順番: 4, 秒数: 10, 読み上げ: "胸を張って、しっかり引く。" },
+      { タスク名: "ラットプルダウン", 順番: 5, 秒数: 5, 読み上げ: "ラスト1回！頑張って！" },
+      { タスク名: "スクワット", 順番: 1, 秒数: 5, 読み上げ: "1回目。深く、丁寧に。" },
+      { タスク名: "スクワット", 順番: 2, 秒数: 5, 読み上げ: "2回目。膝を前に出さないように。" },
+      { タスク名: "スクワット", 順番: 3, 秒数: 5, 読み上げ: "3回目。お尻を意識して。" },
+      { タスク名: "スクワット", 順番: 4, 秒数: 10, 読み上げ: "フォームを崩さず、あと半分！" },
+      { タスク名: "スクワット", 順番: 5, 秒数: 5, 読み上げ: "最後の1回！よくできました！" },
+      { タスク名: "プランク", 順番: 1, 秒数: 30, 読み上げ: "体幹を意識して30秒キープ！" },
+      { タスク名: "プランク", 順番: 2, 秒数: 10, 読み上げ: "休憩10秒。呼吸を整えて。" },
+      { タスク名: "プランク", 順番: 3, 秒数: 30, 読み上げ: "もう一度30秒！頑張って！" },
+    ];
+
+    // --- Global State ---
+    let currentWorkoutTasks = [];
+    let currentTaskIndex = 0;
+    let countdownIntervalId = null;
+    let nextTaskTimeoutId = null;
+    let currentWorkoutName = "";
+    let timerState = "IDLE"; // IDLE, RUNNING, PAUSED
+    let remainingSeconds = 0;
+    let speechSynthesisVoices = [];
+
+    // --- DOM Elements ---
+    const taskButtonsContainer = document.getElementById("taskButtons");
+    const currentWorkoutNameDisplay = document.getElementById("currentWorkoutNameDisplay");
+    const taskNameDisplay = document.getElementById("taskNameDisplay");
+    const speakTextDisplay = document.getElementById("speakTextDisplay");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const timerControls = document.getElementById("timerControls");
+    const pauseResumeButton = document.getElementById("pauseResumeButton");
+    const stopButton = document.getElementById("stopButton");
+    const workoutTaskListContainer = document.getElementById("workoutTaskListContainer");
+    const taskListTitle = document.getElementById("taskListTitle");
+    const workoutTaskListUL = document.getElementById("workoutTaskList");
+
+
+    // --- Speech Synthesis ---
+    // Function to initialize speech synthesis voices
+    function initializeVoices() {
+      speechSynthesisVoices = speechSynthesis.getVoices();
+      if (speechSynthesisVoices.length === 0 && speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = () => {
+          speechSynthesisVoices = speechSynthesis.getVoices();
+        };
+      }
+    }
+
+    // Function to speak text with a callback on end
+    function speak(text, onEndCallback = null) {
+      speechSynthesis.cancel(); 
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "ja-JP"; 
+
+      let voice = speechSynthesisVoices.find(v => v.name === "Kyoko");
+      if (!voice) voice = speechSynthesisVoices.find(v => v.lang === "ja-JP" && (v.name.includes("Female") || (typeof v.gender === 'string' && v.gender.toLowerCase() === 'female')));
+      if (!voice) voice = speechSynthesisVoices.find(v => v.lang === "ja-JP");
+      if (voice) utter.voice = voice; 
+
+      utter.pitch = 1.1; 
+      utter.rate = 1.0;  
+
+      if (onEndCallback) {
+        utter.onend = onEndCallback;
+      }
+      utter.onerror = (event) => {
+        console.error("Speech synthesis error:", event.error);
+        if (onEndCallback) { 
+            onEndCallback();
+        }
+      };
+      speechSynthesis.speak(utter);
+    }
+
+    // --- UI Update Functions ---
+    function updateTimerDisplay(seconds) {
+      timerDisplay.textContent = String(seconds).padStart(2, '0');
+    }
+
+    function updateTaskInfo(workoutNameText, taskNameText, speakTextContent) {
+      currentWorkoutNameDisplay.textContent = workoutNameText;
+      taskNameDisplay.textContent = taskNameText;
+      speakTextDisplay.textContent = speakTextContent;
+    }
+
+    function updateControlButtons() {
+      if (timerState === "IDLE") {
+        timerControls.classList.add("hidden");
+      } else {
+        timerControls.classList.remove("hidden");
+        pauseResumeButton.textContent = (timerState === "RUNNING") ? "一時停止" : "再開";
+      }
+    }
+
+    function displayWorkoutProgressList() {
+      if (!currentWorkoutTasks || currentWorkoutTasks.length === 0) {
+        workoutTaskListContainer.classList.add("hidden");
+        return;
+      }
+
+      workoutTaskListContainer.classList.remove("hidden");
+      taskListTitle.textContent = `${currentWorkoutName} のタスク:`;
+      workoutTaskListUL.innerHTML = ''; 
+
+      currentWorkoutTasks.forEach((task, index) => {
+        const listItem = document.createElement("li");
+        listItem.classList.add("task-item");
+        if (index < currentTaskIndex) {
+          listItem.classList.add("completed");
+        } else if (index === currentTaskIndex && timerState !== "IDLE") {
+          listItem.classList.add("current");
+        } else {
+          listItem.classList.add("pending");
+        }
+        
+        listItem.innerHTML = ''; 
+
+        const taskOrderStrong = document.createElement('strong');
+        taskOrderStrong.textContent = `${task.順番}:`; 
+        listItem.appendChild(taskOrderStrong);
+
+        const taskDescriptionSpan = document.createElement('span');
+        taskDescriptionSpan.classList.add('task-description');
+        taskDescriptionSpan.textContent = task.読み上げ;
+        listItem.appendChild(taskDescriptionSpan);
+        
+        const durationControlDiv = document.createElement('div');
+        durationControlDiv.classList.add('task-duration-control');
+
+        const durationInput = document.createElement('input');
+        durationInput.type = 'number';
+        durationInput.value = task.秒数;
+        durationInput.min = '1'; 
+        durationInput.classList.add('task-duration-input');
+        durationInput.dataset.taskIndex = index; 
+
+        durationInput.addEventListener('change', (event) => {
+            const taskIdx = parseInt(event.target.dataset.taskIndex, 10);
+            let newDuration = parseInt(event.target.value, 10);
+
+            if (isNaN(newDuration) || newDuration <= 0) {
+                newDuration = currentWorkoutTasks[taskIdx].秒数; 
+                event.target.value = newDuration; 
+            }
+            currentWorkoutTasks[taskIdx].秒数 = newDuration;
+        });
+
+        const durationUnitLabel = document.createElement('span');
+        durationUnitLabel.classList.add('duration-unit-label');
+        durationUnitLabel.textContent = '秒';
+
+        durationControlDiv.appendChild(durationInput);
+        durationControlDiv.appendChild(durationUnitLabel);
+        listItem.appendChild(durationControlDiv);
+
+        workoutTaskListUL.appendChild(listItem);
+      });
+    }
+
+    // --- Timer Logic ---
+    function setupWorkoutButtons() {
+      const uniqueTaskNames = [...new Set(tasks.map(t => t.タスク名))];
+      taskButtonsContainer.innerHTML = ''; 
+      uniqueTaskNames.forEach(name => {
+        const btn = document.createElement("button");
+        btn.textContent = name;
+        btn.onclick = () => startWorkout(name);
+        taskButtonsContainer.appendChild(btn);
+      });
+    }
+
+    function startWorkout(workoutName) {
+      if (timerState !== "IDLE") { 
+        stopWorkout(false);
+      }
+      currentWorkoutName = workoutName;
+      currentWorkoutTasks = tasks.filter(t => t.タスク名 === workoutName).sort((a, b) => a.順番 - b.順番);
+      currentTaskIndex = 0;
+      timerState = "RUNNING";
+
+      updateControlButtons();
+      // For currentWorkoutNameDisplay, show the workout name.
+      // For taskNameDisplay, show "開始します" initially.
+      updateTaskInfo(currentWorkoutName, "開始します", ""); // Modified
+      displayWorkoutProgressList(); 
+
+      speak(`${currentWorkoutName}を開始します。`, () => {
+        if (timerState === "RUNNING") { 
+          executeCurrentTaskStep();
+        }
+      });
+    }
+
+    function executeCurrentTaskStep() {
+      if (timerState === "IDLE") return; 
+
+      if (currentTaskIndex >= currentWorkoutTasks.length) { 
+        speak(`${currentWorkoutName}を終了します。お疲れ様でした！`, () => {
+          stopWorkout(false); 
+          displayWorkoutProgressList(); 
+        });
+        return;
+      }
+
+      const task = currentWorkoutTasks[currentTaskIndex];
+      // For currentWorkoutNameDisplay, show the workout name.
+      // For taskNameDisplay, show only the step number.
+      updateTaskInfo(
+        currentWorkoutName, // Workout name for the top display
+        `${task.順番}回目`,   // Step number for the second display
+        task.読み上げ        // Speak text for the third display
+      );
+      remainingSeconds = task.秒数; 
+      updateTimerDisplay(remainingSeconds);
+      displayWorkoutProgressList(); 
+
+      speak(task.読み上げ); 
+      if (timerState === "RUNNING") { 
+          runCountdown(); 
+      }
+    }
+
+    function runCountdown() {
+      if (timerState !== "RUNNING") return; 
+      updateTimerDisplay(remainingSeconds); 
+
+      if (countdownIntervalId) clearInterval(countdownIntervalId); 
+
+      countdownIntervalId = setInterval(() => {
+        if (timerState !== "RUNNING") { 
+          clearInterval(countdownIntervalId);
+          return;
+        }
+        remainingSeconds--;
+        updateTimerDisplay(remainingSeconds);
+
+        if (remainingSeconds <= 0) { 
+          clearInterval(countdownIntervalId);
+          currentTaskIndex++; 
+          if (nextTaskTimeoutId) clearTimeout(nextTaskTimeoutId); 
+          nextTaskTimeoutId = setTimeout(() => { 
+            if (timerState === "RUNNING") { 
+              executeCurrentTaskStep();
+            }
+          }, 1000);
+        }
+      }, 1000);
+    }
+
+    function togglePauseResume() {
+      if (timerState === "IDLE") return;
+
+      if (timerState === "RUNNING") {
+        timerState = "PAUSED";
+        speechSynthesis.cancel(); 
+        clearInterval(countdownIntervalId); 
+        clearTimeout(nextTaskTimeoutId); 
+        speak("一時停止します。");
+      } else if (timerState === "PAUSED") {
+        timerState = "RUNNING";
+        speak("再開します。", () => {
+          if (timerState === "RUNNING") { 
+            if (remainingSeconds > 0) { 
+              runCountdown(); 
+            } else { 
+              executeCurrentTaskStep(); 
+            }
+          }
+        });
+      }
+      updateControlButtons();
+      displayWorkoutProgressList(); 
+    }
+
+    function stopWorkout(announce = true) {
+      const wasActive = timerState !== "IDLE";
+      speechSynthesis.cancel(); 
+      clearInterval(countdownIntervalId); 
+      clearTimeout(nextTaskTimeoutId); 
+      const workoutNameToAnnounce = currentWorkoutName; 
+
+      timerState = "IDLE"; 
+      currentWorkoutName = "";
+      remainingSeconds = 0;
+
+      // Reset displays to initial state
+      updateTaskInfo("ワークアウトを選択してください", "ステップ名", "読み上げ内容"); 
+      updateControlButtons(); 
+
+      if (!wasActive || announce) { 
+          workoutTaskListContainer.classList.add("hidden");
+          workoutTaskListUL.innerHTML = '';
+      } else if (wasActive && currentTaskIndex >= currentWorkoutTasks.length) {
+          displayWorkoutProgressList();
+      }
+
+      if (announce && wasActive && workoutNameToAnnounce) { 
+        speak(`${workoutNameToAnnounce}を停止しました。`);
+      }
+    }
+
+    // --- Event Listeners ---
+    pauseResumeButton.addEventListener("click", togglePauseResume);
+    stopButton.addEventListener("click", () => stopWorkout(true));
+
+    // --- Initialization ---
+    window.onload = () => {
+      initializeVoices(); 
+      setupWorkoutButtons(); 
+      updateControlButtons(); 
+      // Set initial display texts
+      updateTaskInfo("ワークアウトを選択してください", "ステップ名", "読み上げ内容"); 
+      updateTimerDisplay("--"); 
+      workoutTaskListContainer.classList.add("hidden"); 
+    };
+  </script>
+</body>
+</html>
