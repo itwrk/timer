@@ -7,6 +7,8 @@ let timerId = null;          // メインタイマー用 ID
 let preId = null;            // 事前カウントダウン用 ID
 let taskStartTime = null;    // タスク開始時刻
 let results = [];            // 実行結果ログ
+let totalSeconds = 0;        // タスクの合計秒数（プログレスバー計算用）
+let isCompletionHandled = false; // 終了処理が実行済みかのフラグ
 
 // --- DOM取得 ---
 const importCsvInput     = document.getElementById('importCsvInput');
@@ -21,11 +23,41 @@ const endButton          = document.getElementById('endButton');
 const sequenceTitle      = document.getElementById('sequenceTitle');
 const sequenceList       = document.getElementById('sequenceList');
 const resultsTableBody   = document.querySelector('#resultsTable tbody');
+const progressRingCircle = document.querySelector('.progress-ring-circle');
 
+// プログレスリングの円周を計算
+const progressRingRadius = parseInt(progressRingCircle.getAttribute('r'));
+const progressRingCircumference = 2 * Math.PI * progressRingRadius;
+progressRingCircle.style.strokeDasharray = `${progressRingCircumference} ${progressRingCircumference}`;
 
+// プログレスリングの更新関数
+function updateProgressRing(percent) {
+  const offset = progressRingCircumference - (percent / 100 * progressRingCircumference);
+  progressRingCircle.style.strokeDashoffset = offset;
+}
 
-// --- スクリプトの先頭あたりに置く ---
-// 無音ループを再生してAudioContextを起動し、バックグラウンドでも音声が止まらないように試みる
+// タスク種類に応じたアイコンを取得する関数
+function getTaskIcon(taskName) {
+  const taskIcons = {
+    'ラットプルダウン': 'fa-solid fa-arrow-down-wide-short',
+    'スクワット': 'fa-solid fa-person-walking',
+    'シーテッドロー': 'fa-solid fa-arrows-left-right',
+    '机を上にする': 'fa-solid fa-table',
+    '歯を磨く': 'fa-solid fa-tooth',
+    '着替える': 'fa-solid fa-shirt',
+    // デフォルトアイコン
+    'default': 'fa-solid fa-dumbbell'
+  };
+  
+  return taskIcons[taskName] || taskIcons['default'];
+}
+
+// 休憩かどうかを判定する関数
+function isRestPeriod(taskText) {
+  return taskText.includes('休憩') || parseInt(taskText.match(/\d+/)?.[0] || 0) > 30;
+}
+
+// --- 無音ループを再生してAudioContextを起動し、バックグラウンドでも音声が止まらないように試みる
 function enableBackgroundAudioHack() {
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const osc = ctx.createOscillator();
@@ -41,8 +73,6 @@ document.addEventListener('click', function initBgAudio() {
   enableBackgroundAudioHack();
   document.removeEventListener('click', initBgAudio);
 });
-
-
 
 // --- 音声読み上げ関数 ---
 function speak(text) {
@@ -79,6 +109,9 @@ window.addEventListener('DOMContentLoaded', () => {
     .then(res => res.text())
     .then(text => parseAndSetupCSV(text))
     .catch(() => console.warn('firstdata.csv の読み込みに失敗'));
+    
+  // 初期状態でプログレスリングを非表示
+  updateProgressRing(100);
 });
 
 // --- 「読み込む」ボタンでユーザーCSVを読み込む ---
@@ -94,17 +127,22 @@ loadCsvButton.addEventListener('click', () => {
 function setupTaskButtons() {
   taskButtons.innerHTML = '';
   currentTaskDisplay.textContent = 'タスクを選択してください';
+  currentTaskDisplay.innerHTML = '<i class="fas fa-info-circle"></i> タスクを選択してください';
   timerDisplay.textContent = '--:--';
   timerControls.classList.add('hidden');
   sequenceList.innerHTML = '';
   resultsTableBody.innerHTML = '';
-  sequenceTitle.textContent = '実行予定のタスク';
+  sequenceTitle.innerHTML = '<i class="fas fa-list-ol"></i> 実行予定のタスク';
   results = [];
+  
+  // プログレスリングをリセット
+  updateProgressRing(100);
 
   const names = [...new Set(allTasks.map(t=>t['タスク名']))];
   names.forEach(name => {
     const btn = document.createElement('button');
-    btn.textContent = name;
+    const icon = getTaskIcon(name);
+    btn.innerHTML = `<i class="${icon}"></i> ${name}`;
     btn.classList.add('task-btn');
     btn.addEventListener('click', ()=> startSequenceFor(name));
     taskButtons.appendChild(btn);
@@ -120,20 +158,27 @@ function startSequenceFor(name) {
     .sort((a,b)=> (a['順番']||0)-(b['順番']||0));
   sequenceIndex = 0;
   taskStartTime = new Date();   // 開始時刻を記録
+  isCompletionHandled = false;  // 終了処理フラグをリセット
   renderSequenceList(name);
   runNextStep();
 }
 
 // --- 実行予定リスト表示 (実行済み除外&ハイライト)&秒数編集 ---
 function renderSequenceList(name) {
-  sequenceTitle.textContent = `${name} のタスク`;
+  sequenceTitle.innerHTML = `<i class="fas fa-list-ol"></i> ${name} のタスク`;
   sequenceList.innerHTML = '';
   sequenceTasks.forEach((task,i)=>{
     if (i<sequenceIndex) return; // 実行済みを除外
     const item = document.createElement('div');
     item.className = 'sequence-item'+(i===sequenceIndex?' active':'');
+    
+    // タスク内容に応じたアイコンを追加
+    const isRest = isRestPeriod(task['読み上げテキスト']);
+    const icon = isRest ? 'fa-solid fa-mug-hot' : 'fa-solid fa-person-running';
+    
     const label = document.createElement('span');
-    label.textContent = task['読み上げテキスト']||'';
+    label.innerHTML = `<i class="${icon}"></i> ${task['読み上げテキスト']||''}`;
+    
     const inp = document.createElement('input');
     inp.type='number'; inp.value=task['秒数'];
     inp.className='seq-time-input'; inp.dataset.index=i;
@@ -141,7 +186,9 @@ function renderSequenceList(name) {
       const idx=+e.target.dataset.index, v=+e.target.value;
       sequenceTasks[idx]['秒数']=v;
       if(idx===sequenceIndex){
-        remainingSeconds=v; updateTimerDisplay();
+        remainingSeconds=v; 
+        totalSeconds=v;
+        updateTimerDisplay();
       }
     });
     item.append(label,inp,document.createTextNode(' 秒'));
@@ -155,24 +202,46 @@ function runNextStep() {
   if(sequenceIndex>=sequenceTasks.length){
     if(preId!==null){clearInterval(preId);preId=null;}
     if(timerId!==null){clearInterval(timerId);timerId=null;}
+    
+    // 終了処理が既に実行済みの場合は何もしない
+    if (isCompletionHandled) return;
+    
+    // 終了処理フラグを立てる
+    isCompletionHandled = true;
+    
     const name=sequenceTasks[0]?.['タスク名']||'';
     const msg=`${name}を終了します、お疲れ様でした`;
-    currentTaskDisplay.textContent=msg; speak(msg);
-    timerDisplay.textContent='--:--'; timerControls.classList.add('hidden');
+    currentTaskDisplay.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+    speak(msg);
+    timerDisplay.textContent='--:--'; 
+    timerControls.classList.add('hidden');
+    // プログレスリングをリセット
+    updateProgressRing(100);
     recordSummary();  // ←サマリー表示
     return;
   }
+  
   const task=sequenceTasks[sequenceIndex];
   remainingSeconds=task['秒数'];
+  totalSeconds=task['秒数']; // 合計秒数を保存
+  
   // 最初のみ5秒待機
   if(sequenceIndex===0){
     let cnt=5;
-    currentTaskDisplay.textContent=`${task['タスク名']}を開始します… ${cnt}`;
+    const taskIcon = getTaskIcon(task['タスク名']);
+    currentTaskDisplay.innerHTML = `<i class="${taskIcon}"></i> ${task['タスク名']}を開始します… ${cnt}`;
     speak(`${task['タスク名']}を開始します`);
     timerDisplay.textContent=cnt;
+    updateProgressRing(0); // 開始時は0%から
     preId=setInterval(()=>{
       cnt--; timerDisplay.textContent=cnt;
-      if(cnt<=0){clearInterval(preId);preId=null; startStep(task);}
+      // カウントダウン中のプログレスバー更新
+      updateProgressRing((5-cnt) * 20); // 5秒間で0%から100%に
+      if(cnt<=0){
+        clearInterval(preId);
+        preId=null; 
+        startStep(task);
+      }
     },1000);
   } else {
     startStep(task);
@@ -184,18 +253,44 @@ function startStep(task){
   if(preId!==null){clearInterval(preId);preId=null;}
   const txt=task['読み上げテキスト']||'';
   speak(txt);
-  currentTaskDisplay.textContent=`${task['タスク名']}：${txt}`;
+  
+  // タスク内容に応じたアイコンを表示
+  const isRest = isRestPeriod(txt);
+  const icon = isRest ? 'fa-solid fa-mug-hot' : 'fa-solid fa-person-running';
+  currentTaskDisplay.innerHTML = `<i class="${icon}"></i> ${task['タスク名']}：${txt}`;
+  
   recordResult(task,task['秒数']);
   updateTimerDisplay();
   timerControls.classList.remove('hidden');
   renderSequenceList(task['タスク名']);
+  
+  // プログレスリングを初期化
+  updateProgressRing(0);
+  
+  // タイマーの開始時刻を記録
+  const startTime = Date.now();
+  
   timerId=setInterval(()=>{
-    remainingSeconds--; updateTimerDisplay();
-    if(remainingSeconds<=0){
-      clearInterval(timerId); timerId=null;
-      sequenceIndex++; runNextStep();
+    // 経過時間を計算（ミリ秒単位）
+    const elapsedMs = Date.now() - startTime;
+    // 秒単位に変換して切り捨て
+    const elapsedSeconds = Math.floor(elapsedMs / 1000);
+    // 残り時間を計算
+    remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+    
+    updateTimerDisplay();
+    
+    // プログレスリングの更新
+    const percent = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+    updateProgressRing(percent);
+    
+    if(remainingSeconds <= 0){
+      clearInterval(timerId); 
+      timerId = null;
+      sequenceIndex++; 
+      runNextStep();
     }
-  },1000);
+  },100); // より細かい更新間隔（100ms）に変更
 }
 
 // --- 表示更新 ---
@@ -216,7 +311,10 @@ function updateResultsTable(){
   resultsTableBody.innerHTML='';
   results.forEach(r=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${r.time}</td><td>${r.elapsed}</td><td>${r.content}</td>`;
+    // 休憩かどうかでアイコンを変える
+    const isRest = isRestPeriod(r.content);
+    const icon = isRest ? 'fa-solid fa-mug-hot' : 'fa-solid fa-person-running';
+    tr.innerHTML=`<td>${r.time}</td><td>${r.elapsed}</td><td><i class="${icon}"></i> ${r.content}</td>`;
     resultsTableBody.appendChild(tr);
   });
 }
@@ -236,7 +334,7 @@ function recordSummary(){
   tr.innerHTML=`
     <td>合計実行時間</td>
     <td>${totalStr}</td>
-    <td>開始: ${startStr} 〜 終了: ${endStr}</td>
+    <td><i class="fas fa-flag-checkered"></i> 開始: ${startStr} 〜 終了: ${endStr}</td>
   `;
   resultsTableBody.appendChild(tr);
 }
@@ -244,19 +342,44 @@ function recordSummary(){
 // --- 一時停止／再開 ---
 pauseResumeButton.addEventListener('click',()=>{
   if(!timerId) return;
-  if(pauseResumeButton.textContent==='一時停止'){
-    clearInterval(timerId); speechSynthesis.pause();
-    pauseResumeButton.textContent='再開';
+  
+  if(pauseResumeButton.innerHTML.includes('一時停止')){
+    clearInterval(timerId); 
+    timerId = null;
+    speechSynthesis.pause();
+    pauseResumeButton.innerHTML='<i class="fas fa-play"></i> 再開';
+    
+    // 一時停止時の残り時間を保存
+    pausedRemainingSeconds = remainingSeconds;
+    
   } else {
-    pauseResumeButton.textContent='一時停止';
+    pauseResumeButton.innerHTML='<i class="fas fa-pause"></i> 一時停止';
     speechSynthesis.resume();
+    
+    // 再開時の開始時刻を記録
+    const restartTime = Date.now();
+    
     timerId=setInterval(()=>{
-      remainingSeconds--; updateTimerDisplay();
-      if(remainingSeconds<=0){
-        clearInterval(timerId); timerId=null;
-        sequenceIndex++; runNextStep();
+      // 再開後の経過時間を計算（ミリ秒単位）
+      const elapsedSincePause = Date.now() - restartTime;
+      // 秒単位に変換して切り捨て
+      const elapsedSeconds = Math.floor(elapsedSincePause / 1000);
+      // 残り時間を計算
+      remainingSeconds = Math.max(0, pausedRemainingSeconds - elapsedSeconds);
+      
+      updateTimerDisplay();
+      
+      // プログレスリングの更新
+      const percent = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+      updateProgressRing(percent);
+      
+      if(remainingSeconds <= 0){
+        clearInterval(timerId); 
+        timerId = null;
+        sequenceIndex++; 
+        runNextStep();
       }
-    },1000);
+    },100); // より細かい更新間隔（100ms）
   }
 });
 
@@ -265,11 +388,23 @@ endButton.addEventListener('click',()=>{
   if(preId!==null){clearInterval(preId);preId=null;}
   if(timerId!==null){clearInterval(timerId);timerId=null;}
   speechSynthesis.cancel();
+  
+  // 終了処理が既に実行済みの場合は何もしない
+  if (isCompletionHandled) return;
+  
+  // 終了処理フラグを立てる
+  isCompletionHandled = true;
+  
   const name=sequenceTasks[0]?.['タスク名']||'',
         msg=`${name}を終了します、お疲れ様でした`;
-  currentTaskDisplay.textContent=msg; speak(msg);
-  timerDisplay.textContent='--:--'; timerControls.classList.add('hidden');
-  recordSummary(); sequenceIndex=sequenceTasks.length;
+  currentTaskDisplay.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+  speak(msg);
+  timerDisplay.textContent='--:--'; 
+  timerControls.classList.add('hidden');
+  // プログレスリングをリセット
+  updateProgressRing(100);
+  recordSummary(); 
+  sequenceIndex=sequenceTasks.length;
 });
 
 // --- CSVエクスポート ---

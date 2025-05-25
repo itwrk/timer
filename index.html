@@ -5,40 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>筋トレ音声タイマー</title>
   <link rel="stylesheet" href="styles.css" />
+  <!-- Font Awesome アイコンライブラリの追加 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
   <div class="container">
-    <h1>筋トレ音声タイマー</h1>
+    <h1><i class="fas fa-dumbbell"></i> 筋トレ音声タイマー</h1>
 
     <!-- CSV 入出力セクション -->
     <div class="csv-controls">
       <input type="file" id="importCsvInput" accept=".csv" />
-      <button id="loadCsvButton" class="csv-btn">読み込む</button>
-      <button id="exportCsvButton" class="csv-btn">CSV エクスポート</button>
+      <button id="loadCsvButton" class="csv-btn"><i class="fas fa-file-import"></i> 読み込む</button>
+      <button id="exportCsvButton" class="csv-btn"><i class="fas fa-file-export"></i> CSV エクスポート</button>
     </div>
 
     <!-- タスク名ボタン群 -->
     <div class="button-group" id="taskButtons"></div>
 
     <!-- タイマー表示・操作 -->
-    <div class="info" id="currentTaskDisplay">タスクを選択してください</div>
-    <div class="timer" id="timerDisplay">--:--</div>
+    <div class="info" id="currentTaskDisplay"><i class="fas fa-info-circle"></i> タスクを選択してください</div>
+    
+    <!-- 円形プログレスバーとタイマー表示 -->
+    <div class="timer-container">
+      <div class="progress-ring-container">
+        <svg class="progress-ring" width="200" height="200">
+          <circle class="progress-ring-circle-bg" cx="100" cy="100" r="90" />
+          <circle class="progress-ring-circle" cx="100" cy="100" r="90" />
+        </svg>
+        <div class="timer" id="timerDisplay">--:--</div>
+      </div>
+    </div>
+    
     <div class="controls hidden" id="timerControls">
-      <button id="prevButton" class="control-btn">前へ</button>
-      <button id="pauseResumeButton" class="control-btn">一時停止</button>
-      <button id="nextButton" class="control-btn">次へ</button>
-      <button id="endButton" class="control-btn">終了</button>
+      <button id="prevButton" class="control-btn"><i class="fas fa-step-backward"></i> 前へ</button>
+      <button id="pauseResumeButton" class="control-btn"><i class="fas fa-pause"></i> 一時停止</button>
+      <button id="nextButton" class="control-btn"><i class="fas fa-step-forward"></i> 次へ</button>
+      <button id="endButton" class="control-btn"><i class="fas fa-stop"></i> 終了</button>
     </div>
 
     <!-- 実行予定リスト -->
     <div class="sequence-container">
-      <h3 id="sequenceTitle">実行予定のタスク</h3>
+      <h3 id="sequenceTitle"><i class="fas fa-list-ol"></i> 実行予定のタスク</h3>
       <div class="sequence-list" id="sequenceList"></div>
     </div>
 
     <!-- 実行結果ログ -->
     <div class="results-container">
-      <h3>実行結果ログ</h3>
+      <h3><i class="fas fa-history"></i> 実行結果ログ</h3>
       <table id="resultsTable">
         <thead><tr><th>日時</th><th>経過時間 (秒)</th><th>内容</th></tr></thead>
         <tbody></tbody>
