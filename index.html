@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>筋トレ音声タイマー</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>筋トレ音声タイマー</h1>
+
+    <!-- CSV 入出力セクション -->
+    <div class="csv-controls">
+      <input type="file" id="importCsvInput" accept=".csv" />
+      <button id="loadCsvButton" class="csv-btn">読み込む</button>
+      <button id="exportCsvButton" class="csv-btn">CSV エクスポート</button>
+    </div>
+
+    <!-- タスク名ボタン群 -->
+    <div class="button-group" id="taskButtons"></div>
+
+    <!-- タイマー表示・操作 -->
+    <div class="info" id="currentTaskDisplay">タスクを選択してください</div>
+    <div class="timer" id="timerDisplay">--:--</div>
+    <div class="controls hidden" id="timerControls">
+      <button id="prevButton" class="control-btn">前へ</button>
+      <button id="pauseResumeButton" class="control-btn">一時停止</button>
+      <button id="nextButton" class="control-btn">次へ</button>
+      <button id="endButton" class="control-btn">終了</button>
+    </div>
+
+    <!-- 実行予定リスト -->
+    <div class="sequence-container">
+      <h3 id="sequenceTitle">実行予定のタスク</h3>
+      <div class="sequence-list" id="sequenceList"></div>
+    </div>
+
+    <!-- 実行結果ログ -->
+    <div class="results-container">
+      <h3>実行結果ログ</h3>
+      <table id="resultsTable">
+        <thead><tr><th>日時</th><th>経過時間 (秒)</th><th>内容</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
