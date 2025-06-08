@@ -3,20 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>筋トレ音声タイマー</title>
+  <title>ライフリッスンタイマー</title>
   <link rel="stylesheet" href="styles.css" />
   <!-- Font Awesome アイコンライブラリの追加 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
+  <!-- 達成演出用オーバーレイ -->
+  <div id="completionEffect" class="completion-effect-overlay">
+    <div class="starburst"></div>
+  </div>
+
   <div class="container">
-    <h1><i class="fas fa-dumbbell"></i> 筋トレ音声タイマー</h1>
+    <div class="header-container">
+      <h1><i class="fas fa-headphones"></i> ライフリッスンタイマー</h1>
+      <a href="edit.html" class="edit-link"><i class="fas fa-edit"></i> タスク編集</a>
+    </div>
 
     <!-- CSV 入出力セクション -->
     <div class="csv-controls">
       <input type="file" id="importCsvInput" accept=".csv" />
       <button id="loadCsvButton" class="csv-btn"><i class="fas fa-file-import"></i> 読み込む</button>
       <button id="exportCsvButton" class="csv-btn"><i class="fas fa-file-export"></i> CSV エクスポート</button>
+    </div>
+
+    <!-- 新規タスク追加セクション -->
+    <div class="add-task-section">
+      <div class="section-header" id="addTaskHeader">
+        <i class="fas fa-plus-circle"></i> 新規タスク追加
+        <i class="fas fa-chevron-down toggle-icon"></i>
+      </div>
+      <div class="section-content hidden" id="addTaskContent">
+        <div class="form-group">
+          <label for="newTaskName">タスク名:</label>
+          <input type="text" id="newTaskName" placeholder="新しいタスク名を入力" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="newTaskIcon">アイコン:</label>
+          <select id="newTaskIcon" class="form-select">
+            <option value="fa-solid fa-headphones">ヘッドフォン (デフォルト)</option>
+            <option value="fa-solid fa-arrow-down-wide-short">ラットプルダウン</option>
+            <option value="fa-solid fa-person-walking">スクワット</option>
+            <option value="fa-solid fa-arrows-left-right">シーテッドロー</option>
+            <option value="fa-solid fa-table">机</option>
+            <option value="fa-solid fa-tooth">歯</option>
+            <option value="fa-solid fa-shirt">着替え</option>
+            <option value="fa-solid fa-file-invoice">請求書</option>
+            <option value="fa-solid fa-book">読書</option>
+            <option value="fa-solid fa-mug-hot">休憩</option>
+            <option value="fa-solid fa-utensils">食事</option>
+            <option value="fa-solid fa-pen">書く</option>
+          </select>
+        </div>
+        <button id="addTaskButton" class="action-btn"><i class="fas fa-plus"></i> タスクを追加</button>
+      </div>
     </div>
 
     <!-- タスク名ボタン群 -->
@@ -46,12 +86,43 @@
     <!-- 実行予定リスト -->
     <div class="sequence-container">
       <h3 id="sequenceTitle"><i class="fas fa-list-ol"></i> 実行予定のタスク</h3>
-      <div class="sequence-list" id="sequenceList"></div>
+      <div class="sequence-list-container">
+        <div class="sequence-list" id="sequenceList"></div>
+      </div>
+    </div>
+
+    <!-- 新規ステップ追加セクション -->
+    <div class="add-step-section hidden" id="addStepSection">
+      <div class="section-header">
+        <i class="fas fa-plus-circle"></i> 新規ステップ追加
+      </div>
+      <div class="section-content">
+        <div class="form-group">
+          <label for="newStepName">項目名:</label>
+          <input type="text" id="newStepName" placeholder="項目名（ステップ名）を入力" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="newStepText">読み上げテキスト:</label>
+          <input type="text" id="newStepText" placeholder="読み上げるテキストを入力" class="form-input">
+        </div>
+        <div class="form-group inline-group">
+          <label for="newStepSeconds">秒数:</label>
+          <input type="number" id="newStepSeconds" value="7" min="1" class="form-input number-input">
+          <span>秒</span>
+        </div>
+        <button id="addStepButton" class="action-btn"><i class="fas fa-plus"></i> ステップを追加</button>
+      </div>
     </div>
 
     <!-- 実行結果ログ -->
     <div class="results-container">
-      <h3><i class="fas fa-history"></i> 実行結果ログ</h3>
+      <div class="results-header">
+        <h3><i class="fas fa-history"></i> 実行結果ログ</h3>
+        <div class="results-buttons">
+          <button id="copyResultsButton" class="copy-btn"><i class="fas fa-copy"></i> ログをコピー</button>
+          <button id="clearResultsButton" class="clear-btn"><i class="fas fa-trash"></i> ログを消去</button>
+        </div>
+      </div>
       <table id="resultsTable">
         <thead><tr><th>日時</th><th>経過時間 (秒)</th><th>内容</th></tr></thead>
         <tbody></tbody>

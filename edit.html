@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>タスク編集 - ライフリッスンタイマー</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Font Awesome アイコンライブラリの追加 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* タスク編集ページ専用スタイル */
+    .edit-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .back-link {
+      color: #3498db;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-weight: bold;
+    }
+    
+    .back-link i {
+      margin-right: 5px;
+    }
+    
+    .task-list {
+      margin-bottom: 30px;
+    }
+    
+    .task-header {
+      background-color: #f8f9fa;
+      padding: 10px 15px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .task-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .task-action-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s;
+    }
+    
+    .edit-btn {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .add-btn {
+      background-color: #2ecc71;
+      color: white;
+    }
+    
+    .steps-container {
+      margin-left: 20px;
+      border-left: 2px solid #e0e0e0;
+      padding-left: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .step-item {
+      padding: 10px;
+      border-bottom: 1px solid #e0e0e0;
+      display: grid;
+      grid-template-columns: 1fr 2fr 80px 100px;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .step-item:last-child {
+      border-bottom: none;
+    }
+    
+    .step-header {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+    
+    .step-actions {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .step-input {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .step-number {
+      width: 60px;
+      text-align: center;
+    }
+    
+    .add-task-form {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .form-group {
+      flex: 1;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .form-submit {
+      background-color: #2ecc71;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .task-collapsed .steps-container {
+      display: none;
+    }
+    
+    .toggle-steps {
+      cursor: pointer;
+    }
+    
+    .toggle-icon {
+      transition: transform 0.3s;
+    }
+    
+    .task-collapsed .toggle-icon {
+      transform: rotate(-90deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="edit-container">
+    <div class="page-header">
+      <h1><i class="fas fa-edit"></i> タスク編集</h1>
+      <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> タイマーに戻る</a>
+    </div>
+    
+    <div id="taskListContainer">
+      <!-- タスクリストがここに動的に生成されます -->
+    </div>
+    
+    <div class="add-task-form">
+      <h2><i class="fas fa-plus-circle"></i> 新規タスク追加</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="newTaskName" class="form-label">タスク名:</label>
+          <input type="text" id="newTaskName" class="form-input" placeholder="新しいタスク名を入力">
+        </div>
+        <div class="form-group">
+          <label for="newTaskIcon" class="form-label">アイコン:</label>
+          <select id="newTaskIcon" class="form-input">
+            <option value="fa-solid fa-headphones">ヘッドフォン (デフォルト)</option>
+            <option value="fa-solid fa-arrow-down-wide-short">ラットプルダウン</option>
+            <option value="fa-solid fa-person-walking">スクワット</option>
+            <option value="fa-solid fa-arrows-left-right">シーテッドロー</option>
+            <option value="fa-solid fa-table">机</option>
+            <option value="fa-solid fa-tooth">歯</option>
+            <option value="fa-solid fa-shirt">着替え</option>
+            <option value="fa-solid fa-file-invoice">請求書</option>
+            <option value="fa-solid fa-book">読書</option>
+            <option value="fa-solid fa-mug-hot">休憩</option>
+            <option value="fa-solid fa-utensils">食事</option>
+            <option value="fa-solid fa-pen">書く</option>
+          </select>
+        </div>
+      </div>
+      <button id="addNewTaskBtn" class="form-submit"><i class="fas fa-plus"></i> タスクを追加</button>
+    </div>
+  </div>
+
+  <script>
+    // --- LocalStorage キー定義 ---
+    const STORAGE_KEYS = {
+      ALL_TASKS: 'lifelisten_timer_all_tasks',
+      RESULTS: 'lifelisten_timer_results',
+      SUMMARY_RESULTS: 'lifelisten_timer_summary_results',
+      LAST_CSV: 'lifelisten_timer_last_csv'
+    };
+    
+    // --- DOM要素の取得 ---
+    const taskListContainer = document.getElementById('taskListContainer');
+    const newTaskName = document.getElementById('newTaskName');
+    const newTaskIcon = document.getElementById('newTaskIcon');
+    const addNewTaskBtn = document.getElementById('addNewTaskBtn');
+    
+    // --- グローバル変数 ---
+    let allTasks = [];
+    
+    // --- LocalStorageからデータを読み込む関数 ---
+    function loadFromLocalStorage(key) {
+      try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : null;
+      } catch (error) {
+        console.error(`LocalStorageからの読み込みに失敗しました: ${error.message}`);
+        return null;
+      }
+    }
+    
+    // --- LocalStorageにデータを保存する関数 ---
+    function saveToLocalStorage(key, data) {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+        return true;
+      } catch (error) {
+        console.error(`LocalStorageへの保存に失敗しました: ${error.message}`);
+        return false;
+      }
+    }
+    
+    // --- CSVデータの更新関数 ---
+    function updateCSVData() {
+      // CSVヘッダー
+      const headers = ['タスク名', '項目名', '読み上げテキスト', '秒数', '順番'];
+      
+      // CSVデータの作成
+      let csvContent = headers.join(',') + '\n';
+      
+      allTasks.forEach(task => {
+        const row = headers.map(header => {
+          let value = task[header] || '';
+          // カンマやダブルクォートを含む場合はダブルクォートで囲む
+          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+            value = `"${value.replace(/"/g, '""')}"`;
+          }
+          return value;
+        });
+        csvContent += row.join(',') + '\n';
+      });
+      
+      // LocalStorageに保存
+      saveToLocalStorage(STORAGE_KEYS.LAST_CSV, csvContent);
+    }
+    
+    // --- タスクデータを保存する関数 ---
+    function saveTasksData() {
+      saveToLocalStorage(STORAGE_KEYS.ALL_TASKS, allTasks);
+      updateCSVData();
+    }
+    
+    // --- タスク種類に応じたアイコンを取得する関数 ---
+    function getTaskIcon(taskName) {
+      const taskIcons = {
+        'ラットプルダウン': 'fa-solid fa-arrow-down-wide-short',
+        'スクワット': 'fa-solid fa-person-walking',
+        'シーテッドロー': 'fa-solid fa-arrows-left-right',
+        '机を上にする': 'fa-solid fa-table',
+        '歯を磨く': 'fa-solid fa-tooth',
+        '着替える': 'fa-solid fa-shirt',
+        '請求書を作成する': 'fa-solid fa-file-invoice',
+        '読書': 'fa-solid fa-book',
+        '休憩': 'fa-solid fa-mug-hot',
+        '食事': 'fa-solid fa-utensils',
+        '書く': 'fa-solid fa-pen',
+        // デフォルトアイコン
+        'default': 'fa-solid fa-headphones'
+      };
+      
+      return taskIcons[taskName] || taskIcons['default'];
+    }
+    
+    // --- タスクリストを表示する関数 ---
+    function renderTaskList() {
+      taskListContainer.innerHTML = '';
+      
+      // タスク名でグループ化
+      const taskGroups = {};
+      allTasks.forEach(task => {
+        const taskName = task['タスク名'];
+        if (!taskGroups[taskName]) {
+          taskGroups[taskName] = [];
+        }
+        taskGroups[taskName].push(task);
+      });
+      
+      // 各タスクグループを表示
+      Object.keys(taskGroups).forEach(taskName => {
+        const taskGroup = taskGroups[taskName];
+        const icon = getTaskIcon(taskName);
+        
+        // タスクコンテナ
+        const taskContainer = document.createElement('div');
+        taskContainer.className = 'task-list';
+        taskContainer.dataset.taskName = taskName;
+        
+        // タスクヘッダー
+        const taskHeader = document.createElement('div');
+        taskHeader.className = 'task-header toggle-steps';
+        taskHeader.innerHTML = `
+          <div>
+            <i class="${icon}"></i> ${taskName}
+            <i class="fas fa-chevron-down toggle-icon"></i>
+          </div>
+          <div class="task-actions">
+            <button class="task-action-btn add-btn add-step-btn" data-task="${taskName}">
+              <i class="fas fa-plus"></i> ステップ追加
+            </button>
+            <button class="task-action-btn delete-btn delete-task-btn" data-task="${taskName}">
+              <i class="fas fa-trash"></i> 削除
+            </button>
+          </div>
+        `;
+        
+        // タスクヘッダーのクリックイベント
+        taskHeader.addEventListener('click', function(e) {
+          // ボタンクリックは無視
+          if (e.target.closest('.task-action-btn')) return;
+          
+          taskContainer.classList.toggle('task-collapsed');
+        });
+        
+        taskContainer.appendChild(taskHeader);
+        
+        // ステップコンテナ
+        const stepsContainer = document.createElement('div');
+        stepsContainer.className = 'steps-container';
+        
+        // ステップヘッダー
+        const stepHeader = document.createElement('div');
+        stepHeader.className = 'step-item step-header';
+        stepHeader.innerHTML = `
+          <div>項目名</div>
+          <div>読み上げテキスト</div>
+          <div>秒数</div>
+          <div>操作</div>
+        `;
+        stepsContainer.appendChild(stepHeader);
+        
+        // ステップを順番でソート
+        const sortedSteps = [...taskGroup].sort((a, b) => (a['順番'] || 0) - (b['順番'] || 0));
+        
+        // 各ステップを表示
+        sortedSteps.forEach((step, index) => {
+          const stepItem = document.createElement('div');
+          stepItem.className = 'step-item';
+          stepItem.dataset.index = index;
+          stepItem.dataset.order = step['順番'] || 0;
+          
+          const nameInput = document.createElement('input');
+          nameInput.type = 'text';
+          nameInput.className = 'step-input';
+          nameInput.value = step['項目名'] || '';
+          nameInput.placeholder = '項目名を入力';
+          nameInput.addEventListener('change', () => updateStepData(taskName, step['順番'], '項目名', nameInput.value));
+          
+          const textInput = document.createElement('input');
+          textInput.type = 'text';
+          textInput.className = 'step-input';
+          textInput.value = step['読み上げテキスト'] || '';
+          textInput.placeholder = '読み上げテキストを入力';
+          textInput.addEventListener('change', () => updateStepData(taskName, step['順番'], '読み上げテキスト', textInput.value));
+          
+          const secondsInput = document.createElement('input');
+          secondsInput.type = 'number';
+          secondsInput.className = 'step-input step-number';
+          secondsInput.value = step['秒数'] || 7;
+          secondsInput.min = 1;
+          secondsInput.addEventListener('change', () => updateStepData(taskName, step['順番'], '秒数', parseInt(secondsInput.value)));
+          
+          const actionsDiv = document.createElement('div');
+          actionsDiv.className = 'step-actions';
+          
+          // 上に移動ボタン
+          if (index > 0) {
+            const upBtn = document.createElement('button');
+            upBtn.className = 'task-action-btn';
+            upBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+            upBtn.addEventListener('click', () => moveStep(taskName, step['順番'], 'up'));
+            actionsDiv.appendChild(upBtn);
+          }
+          
+          // 下に移動ボタン
+          if (index < sortedSteps.length - 1) {
+            const downBtn = document.createElement('button');
+            downBtn.className = 'task-action-btn';
+            downBtn.innerHTML = '<i class="fas fa-arrow-down"></i>';
+            downBtn.addEventListener('click', () => moveStep(taskName, step['順番'], 'down'));
+            actionsDiv.appendChild(downBtn);
+          }
+          
+          // 削除ボタン
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'task-action-btn delete-btn';
+          deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+          deleteBtn.addEventListener('click', () => deleteStep(taskName, step['順番']));
+          actionsDiv.appendChild(deleteBtn);
+          
+          stepItem.appendChild(nameInput);
+          stepItem.appendChild(textInput);
+          stepItem.appendChild(secondsInput);
+          stepItem.appendChild(actionsDiv);
+          
+          stepsContainer.appendChild(stepItem);
+        });
+        
+        taskContainer.appendChild(stepsContainer);
+        taskListContainer.appendChild(taskContainer);
+      });
+      
+      // ステップ追加ボタンのイベントリスナー
+      document.querySelectorAll('.add-step-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const taskName = this.dataset.task;
+          addNewStep(taskName);
+        });
+      });
+      
+      // タスク削除ボタンのイベントリスナー
+      document.querySelectorAll('.delete-task-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const taskName = this.dataset.task;
+          deleteTask(taskName);
+        });
+      });
+    }
+    
+    // --- ステップデータを更新する関数 ---
+    function updateStepData(taskName, order, field, value) {
+      // 対象のタスクを見つける
+      const taskIndex = allTasks.findIndex(t => 
+        t['タスク名'] === taskName && 
+        t['順番'] === order
+      );
+      
+      if (taskIndex !== -1) {
+        // 値を更新
+        allTasks[taskIndex][field] = value;
+        
+        // データを保存
+        saveTasksData();
+        
+        console.log(`更新: ${taskName} の ${field} を ${value} に変更しました`);
+      }
+    }
+    
+    // --- ステップを移動する関数 ---
+    function moveStep(taskName, order, direction) {
+      // 同じタスク名のステップを取得
+      const taskSteps = allTasks.filter(t => t['タスク名'] === taskName);
+      
+      // 順番でソート
+      taskSteps.sort((a, b) => (a['順番'] || 0) - (b['順番'] || 0));
+      
+      // 現在のステップのインデックスを取得
+      const currentIndex = taskSteps.findIndex(t => t['順番'] === order);
+      
+      if (currentIndex === -1) return;
+      
+      let targetIndex;
+      if (direction === 'up' && currentIndex > 0) {
+        targetIndex = currentIndex - 1;
+      } else if (direction === 'down' && currentIndex < taskSteps.length - 1) {
+        targetIndex = currentIndex + 1;
+      } else {
+        return;
+      }
+      
+      // 順番を入れ替え
+      const tempOrder = taskSteps[currentIndex]['順番'];
+      taskSteps[currentIndex]['順番'] = taskSteps[targetIndex]['順番'];
+      taskSteps[targetIndex]['順番'] = tempOrder;
+      
+      // データを保存
+      saveTasksData();
+      
+      // 再描画
+      renderTaskList();
+    }
+    
+    // --- ステップを削除する関数 ---
+    function deleteStep(taskName, order) {
+      if (!confirm(`このステップを削除してもよろしいですか？`)) return;
+      
+      // 対象のステップを削除
+      allTasks = allTasks.filter(t => !(t['タスク名'] === taskName && t['順番'] === order));
+      
+      // データを保存
+      saveTasksData();
+      
+      // 再描画
+      renderTaskList();
+    }
+    
+    // --- タスクを削除する関数 ---
+    function deleteTask(taskName) {
+      if (!confirm(`タスク「${taskName}」を削除してもよろしいですか？\nこのタスクのすべてのステップが削除されます。`)) return;
+      
+      // 対象のタスクをすべて削除
+      allTasks = allTasks.filter(t => t['タスク名'] !== taskName);
+      
+      // データを保存
+      saveTasksData();
+      
+      // 再描画
+      renderTaskList();
+    }
+    
+    // --- 新しいステップを追加する関数 ---
+    function addNewStep(taskName) {
+      // 同じタスク名のステップを取得
+      const taskSteps = allTasks.filter(t => t['タスク名'] === taskName);
+      
+      // 最大の順番を取得
+      const maxOrder = taskSteps.length > 0 
+        ? Math.max(...taskSteps.map(t => t['順番'] || 0)) 
+        : 0;
+      
+      // 新しいステップを作成
+      const newStep = {
+        'タスク名': taskName,
+        '項目名': `ステップ${maxOrder + 1}`,
+        '読み上げテキスト': '新しいステップです',
+        '秒数': 7,
+        '順番': maxOrder + 1
+      };
+      
+      // タスクリストに追加
+      allTasks.push(newStep);
+      
+      // データを保存
+      saveTasksData();
+      
+      // 再描画
+      renderTaskList();
+    }
+    
+    // --- 新しいタスクを追加する関数 ---
+    function addNewTask() {
+      const taskName = newTaskName.value.trim();
+      
+      if (!taskName) {
+        alert('タスク名を入力してください');
+        return;
+      }
+      
+      // 既存のタスク名をチェック
+      const existingTaskNames = [...new Set(allTasks.map(t => t['タスク名']))];
+      if (existingTaskNames.includes(taskName)) {
+        alert('このタスク名は既に存在します');
+        return;
+      }
+      
+      // 新しいタスクを作成（最初のステップ）
+      const newTask = {
+        'タスク名': taskName,
+        '項目名': '1回目',
+        '読み上げテキスト': '1回目。いいぞ、その調子！',
+        '秒数': 7,
+        '順番': 1
+      };
+      
+      // タスクリストに追加
+      allTasks.push(newTask);
+      
+      // データを保存
+      saveTasksData();
+      
+      // 入力フィールドをクリア
+      newTaskName.value = '';
+      
+      // 再描画
+      renderTaskList();
+    }
+    
+    // --- 初期化処理 ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // LocalStorageからデータを読み込む
+      const savedTasks = loadFromLocalStorage(STORAGE_KEYS.ALL_TASKS);
+      if (savedTasks && savedTasks.length > 0) {
+        allTasks = savedTasks;
+      } else {
+        // デフォルトCSVを読み込む
+        fetch('firstdata.csv')
+          .then(res => res.text())
+          .then(text => {
+            const lines = text.split(/\r?\n/).filter(l => l.trim());
+            if (lines.length < 2) return;
+            
+            const headers = lines[0].split(',').map(h => h.trim());
+            allTasks = lines.slice(1).map(line => {
+              const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+              return headers.reduce((obj, h, i) => {
+                let v = (cols[i]||'').replace(/^"|"$/g,'').trim();
+                if (h==='秒数'||h==='順番') v = Number(v);
+                obj[h] = v;
+                return obj;
+              }, {});
+            });
+            
+            // タスクリストを表示
+            renderTaskList();
+          })
+          .catch(() => console.warn('firstdata.csv の読み込みに失敗'));
+      }
+      
+      // タスクリストを表示
+      renderTaskList();
+      
+      // 新規タスク追加ボタンのイベントリスナー
+      addNewTaskBtn.addEventListener('click', addNewTask);
+    });
+  </script>
+</body>
+</html>
