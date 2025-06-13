@@ -534,36 +534,25 @@ function renderSequenceList(name) {
           textInput.classList.remove('saved');
         }, 500);
         
-        // 現在実行中のタスクの場合は表示も更新
-        if (idx === sequenceIndex) {
-          updateCurrentTaskDisplay();
-        }
-        
         // ツールチップも更新
         textInput.title = newText;
       }
     });
     
-    // テキスト入力時のアイコン更新
-    textInput.addEventListener('input', e => {
-      const newText = e.target.value;
-      const isRest = isRestPeriod(newText);
-      const newIcon = isRest ? 'fa-solid fa-mug-hot' : 'fa-solid fa-person-running';
-      labelContainer.innerHTML = `<i class="${newIcon}"></i>`;
-    });
-    
     // 秒数入力フィールド
-    const timeInput = document.createElement('input');
-    timeInput.type = 'number';
-    timeInput.value = task['秒数'];
-    timeInput.className = 'seq-time-input';
-    timeInput.dataset.index = i;
-    timeInput.addEventListener('change', e => {
+    const secondsInput = document.createElement('input');
+    secondsInput.type = 'number';
+    secondsInput.value = task['秒数'] || 0;
+    secondsInput.className = 'seq-seconds-input';
+    secondsInput.dataset.index = i;
+    secondsInput.min = '1';
+    secondsInput.max = '3600';
+    secondsInput.addEventListener('change', e => {
       const idx = +e.target.dataset.index;
-      const v = +e.target.value;
+      const newSeconds = Math.max(1, Math.min(3600, +e.target.value || 1));
       
       // sequenceTasksの更新
-      sequenceTasks[idx]['秒数'] = v;
+      sequenceTasks[idx]['秒数'] = newSeconds;
       
       // allTasksの対応するタスクを見つけて更新
       const taskIndex = allTasks.findIndex(t => 
@@ -572,64 +561,55 @@ function renderSequenceList(name) {
       );
       
       if (taskIndex !== -1) {
-        allTasks[taskIndex]['秒数'] = v;
+        allTasks[taskIndex]['秒数'] = newSeconds;
         saveTasksData(); // LocalStorageに保存
         
         // 編集成功の視覚的フィードバック
-        timeInput.classList.add('saved');
+        secondsInput.classList.add('saved');
         setTimeout(() => {
-          timeInput.classList.remove('saved');
+          secondsInput.classList.remove('saved');
         }, 500);
       }
       
-      // 現在実行中のタスクの場合はタイマーも更新
-      if (idx === sequenceIndex) {
-        remainingSeconds = v;
-        totalSeconds = v;
-        updateTimerDisplay();
-      }
+      // 入力値を正規化
+      e.target.value = newSeconds;
     });
     
-    // 各要素をアイテムに追加
+    // 上下移動ボタン
+    const moveUpButton = document.createElement('button');
+    moveUpButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    moveUpButton.className = 'move-btn';
+    moveUpButton.title = '上に移動';
+    moveUpButton.disabled = i <= sequenceIndex + 1; // 実行済み+現在実行中の次は移動不可
+    moveUpButton.addEventListener('click', () => moveSequenceTask(i, 'up'));
+    
+    const moveDownButton = document.createElement('button');
+    moveDownButton.innerHTML = '<i class="fas fa-arrow-down"></i>';
+    moveDownButton.className = 'move-btn';
+    moveDownButton.title = '下に移動';
+    moveDownButton.disabled = i >= sequenceTasks.length - 1;
+    moveDownButton.addEventListener('click', () => moveSequenceTask(i, 'down'));
+    
+    // 削除ボタン
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteButton.className = 'delete-btn';
+    deleteButton.title = 'ステップを削除';
+    deleteButton.disabled = i === sequenceIndex; // 現在実行中は削除不可
+    deleteButton.addEventListener('click', () => deleteSequenceTask(i));
+    
+    // 要素を組み立て
     item.appendChild(labelContainer);
     item.appendChild(nameInput);
     item.appendChild(textInput);
-    item.appendChild(timeInput);
-    item.appendChild(document.createTextNode(' 秒'));
+    item.appendChild(secondsInput);
     
-    // 並べ替えボタンを追加
-    if (i > sequenceIndex) { // 実行中のタスクは並べ替えできないようにする
-      const controlsDiv = document.createElement('div');
-      controlsDiv.className = 'sequence-item-controls';
-      
-      // 上に移動ボタン
-      if (i > sequenceIndex + 1) { // 最初のタスクには上移動ボタンを表示しない
-        const upButton = document.createElement('button');
-        upButton.className = 'move-btn';
-        upButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
-        upButton.dataset.index = i;
-        upButton.addEventListener('click', (e) => {
-          e.stopPropagation();
-          moveSequenceTask(+e.currentTarget.dataset.index, 'up');
-        });
-        controlsDiv.appendChild(upButton);
-      }
-      
-      // 下に移動ボタン
-      if (i < sequenceTasks.length - 1) { // 最後のタスクには下移動ボタンを表示しない
-        const downButton = document.createElement('button');
-        downButton.className = 'move-btn';
-        downButton.innerHTML = '<i class="fas fa-arrow-down"></i>';
-        downButton.dataset.index = i;
-        downButton.addEventListener('click', (e) => {
-          e.stopPropagation();
-          moveSequenceTask(+e.currentTarget.dataset.index, 'down');
-        });
-        controlsDiv.appendChild(downButton);
-      }
-      
-      item.appendChild(controlsDiv);
-    }
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'button-container';
+    buttonContainer.appendChild(moveUpButton);
+    buttonContainer.appendChild(moveDownButton);
+    buttonContainer.appendChild(deleteButton);
+    item.appendChild(buttonContainer);
     
     sequenceList.appendChild(item);
   });
@@ -637,23 +617,17 @@ function renderSequenceList(name) {
 
 // --- 新規ステップ追加機能 ---
 function addNewStep() {
-  // 現在選択中のタスクがない場合は何もしない
-  if (sequenceTasks.length === 0) {
-    alert('先にタスクを選択してください');
-    return;
-  }
-  
   // 入力値の取得と検証
   const stepName = newStepName.value.trim();
   const stepText = newStepText.value.trim();
-  const stepSeconds = parseInt(newStepSeconds.value);
+  const stepSeconds = parseInt(newStepSeconds.value) || 7;
   
   // エラーメッセージの削除
   removeErrorMessages();
   
   // バリデーション
   if (!stepName) {
-    showErrorMessage(newStepName, '項目名を入力してください');
+    showErrorMessage(newStepName, 'ステップ名を入力してください');
     return;
   }
   
@@ -662,16 +636,21 @@ function addNewStep() {
     return;
   }
   
-  if (isNaN(stepSeconds) || stepSeconds <= 0) {
-    showErrorMessage(newStepSeconds, '有効な秒数を入力してください');
+  if (stepSeconds < 1 || stepSeconds > 3600) {
+    showErrorMessage(newStepSeconds, '秒数は1〜3600の範囲で入力してください');
     return;
   }
   
   // 現在のタスク名を取得
-  const currentTaskName = sequenceTasks[0]['タスク名'];
+  const currentTaskName = sequenceTasks.length > 0 ? sequenceTasks[0]['タスク名'] : '';
+  if (!currentTaskName) {
+    alert('タスクが選択されていません');
+    return;
+  }
   
-  // 最大の順番を取得
-  const maxOrder = Math.max(...sequenceTasks.map(t => t['順番'] || 0));
+  // 新しい順番を計算（最後に追加）
+  const maxOrder = Math.max(...sequenceTasks.map(t => t['順番'] || 0), 0);
+  const newOrder = maxOrder + 1;
   
   // 新しいステップを作成
   const newStep = {
@@ -679,11 +658,13 @@ function addNewStep() {
     '項目名': stepName,
     '読み上げテキスト': stepText,
     '秒数': stepSeconds,
-    '順番': maxOrder + 1
+    '順番': newOrder
   };
   
-  // ステップをallTasksとsequenceTasksに追加
+  // allTasksに追加
   allTasks.push(newStep);
+  
+  // sequenceTasksに追加
   sequenceTasks.push(newStep);
   
   // LocalStorageに保存
@@ -808,7 +789,7 @@ async function runNextStep() {
   // 初回のみ5秒カウントダウンと開始アナウンス
   if (sequenceIndex === 0) {
     // 「タスク名を開始します」の読み上げ
-    await speak(`${task['タスク名']}を開始します`);
+    speak(`${task['タスク名']}を開始します`);
     
     let preCount = 5;
     currentTaskDisplay.innerHTML = `<i class="${icon}"></i> ${task['タスク名']}を開始します... ${preCount}`;
@@ -840,11 +821,10 @@ async function runNextStep() {
           pauseResumeButton.removeEventListener('click', pauseListener);
           // 最初のステップの表示を更新
           updateCurrentTaskDisplay();
-          // 音声読み上げ
-          speak(task['読み上げテキスト']).then(() => {
-            startTimer(task['秒数']);
-            resolve();
-          });
+          // 音声読み上げとタイマーを同時開始
+          speak(task['読み上げテキスト']);
+          startTimer(task['秒数']);
+          resolve();
         } else {
           currentTaskDisplay.innerHTML = `<i class="${icon}"></i> ${task['タスク名']}を開始します... ${preCount}`;
         }
@@ -853,8 +833,8 @@ async function runNextStep() {
   } else {
     // 表示を更新
     updateCurrentTaskDisplay();
-    // 音声読み上げ
-    await speak(task['読み上げテキスト']);
+    // 音声読み上げとタイマーを同時開始
+    speak(task['読み上げテキスト']);
     startTimer(task['秒数']);
   }
   
@@ -1256,3 +1236,4 @@ copyResultsButton.addEventListener('click', () => {
     }, 1500);
   });
 });
+
