@@ -22,6 +22,7 @@ const STORAGE_KEYS = {
   LAST_CSV: 'lifelisten_timer_last_csv'
 };
 
+
 // --- DOM取得 ---
 const importCsvInput     = document.getElementById('importCsvInput');
 const loadCsvButton      = document.getElementById('loadCsvButton');
